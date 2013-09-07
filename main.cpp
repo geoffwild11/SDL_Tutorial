@@ -9,7 +9,8 @@ const int SCREEN_HEIGHT = 480;
 const int SCREEN_BPP = 32;
 
 //Function Prototypes
-SDL_Surface* Init();
+SDL_Surface* setScreen();
+bool Init();
 
 int main( int argc, char* args[] )
 {
@@ -20,8 +21,12 @@ int main( int argc, char* args[] )
 	*/
 
 	//Set environment
-	SDL_Surface* screen = Init();
-
+	//Initialize all SDL subsystems
+    if(!Init())
+    {
+        return 1;
+    }
+	SDL_Surface* screen = setScreen();
 	SDL_Surface* message = NULL;
 	SDL_Surface* background = NULL;
 
@@ -49,8 +54,19 @@ int main( int argc, char* args[] )
     return 0;
 }
 
-SDL_Surface* Init()
+SDL_Surface* setScreen()
 {
-	SDL_Init( SDL_INIT_EVERYTHING );
 	return SDL_SetVideoMode( SCREEN_WIDTH, SCREEN_HEIGHT, SCREEN_BPP, SDL_SWSURFACE );
+}
+
+bool Init()
+{
+	 //Initialize all SDL subsystems
+	    if( SDL_Init( SDL_INIT_EVERYTHING ) == -1 )
+	    {
+	        return false;
+	    }
+
+	    else
+	    	return true;
 }
