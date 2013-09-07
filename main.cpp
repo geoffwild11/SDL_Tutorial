@@ -15,19 +15,28 @@ const int SCREEN_BPP = 32;
 bool Init(SDL_Surface* &screen);
 SDL_Surface* loadImage(string filename);
 void apply_surface( int x, int y, SDL_Surface* source, SDL_Surface* destination );
+bool loadFile(SDL_Surface* &image, string fileName);
+bool update(SDL_Surface* screen);
+void cleanUp();
 
 int main( int argc, char* args[] )
 {
+
+	SDL_Event event;
 	SDL_Surface* screen = NULL;
-	SDL_Surface* message = NULL;
 	SDL_Surface* background = NULL;
+	SDL_Surface* image = NULL;
+	bool quit = false;
 
 	//Set environment
     if(!Init(screen))
         return 1;
 
-    message = loadImage("hello.bmp");
-    background = loadImage("background.bmp");
+    //Load the files
+    if(!loadFile(image, "x.png"))
+    	return 1;
+    if(!loadFile(background, "background.bmp"))
+    	return 1;
 
     apply_surface( 0, 0, background, screen );
     apply_surface( 320, 0, background, screen );
@@ -35,32 +44,31 @@ int main( int argc, char* args[] )
     apply_surface( 320, 240, background, screen );
 
     //Apply the message to the screen
-     apply_surface( 180, 140, message, screen );
-
-    /*//Load image
-    message = SDL_LoadBMP( "hello.bmp" );*/
-
-    //Apply image to screen
-    //SDL_BlitSurface( message, NULL, screen, NULL );
-
-     //Update the screen
-     if( SDL_Flip( screen ) == -1 )
-     {
-    	 return 1;
-     }
+     apply_surface( 180, 140, image, screen );
 
     //Update Screen
-    //SDL_Flip( screen );
+     if (!update(screen))
+    	 return 1;
 
-    //Pause
-    SDL_Delay( 2000 );
+     while (!quit)
+     {
+    	 //While there's an event to handle
+    	 while( SDL_PollEvent( &event ) )
+    	 {
+    		 //If the user has Xed out the window
+    		 if( event.type == SDL_QUIT )
+             {
+    			 //Quit the program
+                quit = true;
+             }
+    	 }
+     }
 
     //Free the surfaces
-    SDL_FreeSurface( message );
+    SDL_FreeSurface( image );
     SDL_FreeSurface( background );
 
-    //Quit SDL
-    SDL_Quit();
+    cleanUp();
 
     return 0;
 }
@@ -76,7 +84,7 @@ bool Init(SDL_Surface* &screen)
 		if (screen == NULL)
 			return false;
 	//Set the window caption
-	SDL_WM_SetCaption( "Hello World", NULL );
+	SDL_WM_SetCaption( "Event Test", NULL );
 
 	return true;
 }
@@ -117,4 +125,31 @@ void apply_surface( int x, int y, SDL_Surface* source, SDL_Surface* destination 
 
     //Blit the surface
     SDL_BlitSurface( source, NULL, destination, &offset );
+}
+
+bool loadFile(SDL_Surface* &image, string fileName)
+{
+	image = loadImage(fileName);
+
+	if (image == NULL)
+		return false;
+	else
+		return true;
+}
+
+bool update(SDL_Surface* screen)
+{
+	//Update the screen
+	if( SDL_Flip( screen ) == -1 )
+	{
+		return false;
+	}
+
+	else
+		return true;
+}
+
+void cleanUp()
+{
+	SDL_Quit();
 }
