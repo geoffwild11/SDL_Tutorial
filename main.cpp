@@ -9,24 +9,28 @@ const int SCREEN_HEIGHT = 480;
 const int SCREEN_BPP = 32;
 
 //Function Prototypes
-SDL_Surface* setScreen();
+bool setScreen(SDL_Surface* &screen);
 bool Init();
 SDL_Surface* loadImage(string filename);
 void apply_surface( int x, int y, SDL_Surface* source, SDL_Surface* destination );
 
 int main( int argc, char* args[] )
 {
-	//Set environment
-    if(!Init())
-        return 1;
-
-	SDL_Surface* screen = setScreen();
+	SDL_Surface* screen = NULL;
 	SDL_Surface* message = NULL;
 	SDL_Surface* background = NULL;
 
+	//Set environment
+    if(!Init())
+        return 1;
+    if (!setScreen(screen))
+    	return 1;
 
-    //Load image
-    message = SDL_LoadBMP( "hello.bmp" );
+    message = loadImage("hello.bmp");
+
+
+    /*//Load image
+    message = SDL_LoadBMP( "hello.bmp" );*/
 
     //Apply image to screen
     SDL_BlitSurface( message, NULL, screen, NULL );
@@ -46,9 +50,15 @@ int main( int argc, char* args[] )
     return 0;
 }
 
-SDL_Surface* setScreen()
+bool setScreen(SDL_Surface* &screen)
 {
-	return SDL_SetVideoMode( SCREEN_WIDTH, SCREEN_HEIGHT, SCREEN_BPP, SDL_SWSURFACE );
+	screen = SDL_SetVideoMode( SCREEN_WIDTH, SCREEN_HEIGHT, SCREEN_BPP, SDL_SWSURFACE );
+
+	if (screen == NULL)
+		return false;
+
+	else
+		return true;
 }
 
 bool Init()
@@ -57,8 +67,10 @@ bool Init()
 	if( SDL_Init( SDL_INIT_EVERYTHING ) == -1 )
         return false;
 
-	else
-		return true;
+	//Set the window caption
+	SDL_WM_SetCaption( "Hello World", NULL );
+
+	return true;
 }
 
 SDL_Surface* loadImage(string filename)
