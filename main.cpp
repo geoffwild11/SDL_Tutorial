@@ -11,27 +11,19 @@ const int SCREEN_BPP = 32;
 //Function Prototypes
 SDL_Surface* setScreen();
 bool Init();
+SDL_Surface* loadImage(string filename);
+void apply_surface( int x, int y, SDL_Surface* source, SDL_Surface* destination );
 
 int main( int argc, char* args[] )
 {
-	/*
-	//The images
-	    SDL_Surface* hello = NULL;
-	    SDL_Surface* screen = NULL;
-	*/
-
 	//Set environment
-	//Initialize all SDL subsystems
     if(!Init())
-    {
         return 1;
-    }
+
 	SDL_Surface* screen = setScreen();
 	SDL_Surface* message = NULL;
 	SDL_Surface* background = NULL;
 
-
-	//Init(screen);
 
     //Load image
     message = SDL_LoadBMP( "hello.bmp" );
@@ -61,12 +53,48 @@ SDL_Surface* setScreen()
 
 bool Init()
 {
-	 //Initialize all SDL subsystems
-	    if( SDL_Init( SDL_INIT_EVERYTHING ) == -1 )
-	    {
-	        return false;
-	    }
+	//Initialize all SDL subsystems
+	if( SDL_Init( SDL_INIT_EVERYTHING ) == -1 )
+        return false;
 
-	    else
-	    	return true;
+	else
+		return true;
+}
+
+SDL_Surface* loadImage(string filename)
+{
+	//Temporary storage for the image that's loaded
+	SDL_Surface* loadedImage = NULL;
+
+    //The optimized image that will be used
+    SDL_Surface* optimizedImage = NULL;
+
+    //Load the image
+    loadedImage = SDL_LoadBMP( filename.c_str() );
+
+    //If nothing went wrong in loading the image
+    if( loadedImage != NULL )
+    {
+    	//Create an optimized image
+        optimizedImage = SDL_DisplayFormat( loadedImage );
+
+        //Free the old image
+        SDL_FreeSurface( loadedImage );
+    }
+
+    //Return the optimized image
+    return optimizedImage;
+}
+
+void apply_surface( int x, int y, SDL_Surface* source, SDL_Surface* destination )
+{
+    //Make a temporary rectangle to hold the offsets
+    SDL_Rect offset;
+
+    //Give the offsets to the rectangle
+    offset.x = x;
+    offset.y = y;
+
+    //Blit the surface
+    SDL_BlitSurface( source, NULL, destination, &offset );
 }
