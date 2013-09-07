@@ -27,22 +27,37 @@ int main( int argc, char* args[] )
     	return 1;
 
     message = loadImage("hello.bmp");
+    background = loadImage("background.bmp");
 
+    apply_surface( 0, 0, background, screen );
+    apply_surface( 320, 0, background, screen );
+    apply_surface( 0, 240, background, screen );
+    apply_surface( 320, 240, background, screen );
+
+    //Apply the message to the screen
+     apply_surface( 180, 140, message, screen );
 
     /*//Load image
     message = SDL_LoadBMP( "hello.bmp" );*/
 
     //Apply image to screen
-    SDL_BlitSurface( message, NULL, screen, NULL );
+    //SDL_BlitSurface( message, NULL, screen, NULL );
+
+     //Update the screen
+     if( SDL_Flip( screen ) == -1 )
+     {
+    	 return 1;
+     }
 
     //Update Screen
-    SDL_Flip( screen );
+    //SDL_Flip( screen );
 
     //Pause
-    SDL_Delay( 4000 );
+    SDL_Delay( 2000 );
 
-    //Free the loaded image
+    //Free the surfaces
     SDL_FreeSurface( message );
+    SDL_FreeSurface( background );
 
     //Quit SDL
     SDL_Quit();
