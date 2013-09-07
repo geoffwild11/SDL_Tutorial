@@ -1,4 +1,7 @@
 #include "SDL/SDL.h"
+#include "SDL/SDL_image.h"
+#include "SDL/SDL_ttf.h"
+#include "SDL/SDL_mixer.h"
 #include <string>
 
 using namespace std;
@@ -97,7 +100,7 @@ SDL_Surface* loadImage(string filename)
     SDL_Surface* optimizedImage = NULL;
 
     //Load the image
-    loadedImage = SDL_LoadBMP( filename.c_str() );
+    loadedImage = IMG_Load( filename.c_str() );
 
     //If nothing went wrong in loading the image
     if( loadedImage != NULL )
