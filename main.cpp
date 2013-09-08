@@ -3,6 +3,7 @@
 #include "SDL/SDL_ttf.h"
 #include "SDL/SDL_mixer.h"
 #include <string>
+#include <iostream>
 
 using namespace std;
 
@@ -16,6 +17,7 @@ bool Init(SDL_Surface* &screen);
 SDL_Surface* loadImage(string filename);
 void apply_surface( int x, int y, SDL_Surface* source, SDL_Surface* destination );
 bool loadFile(SDL_Surface* &image, string fileName);
+
 bool update(SDL_Surface* screen);
 void cleanUp();
 
@@ -26,6 +28,7 @@ int main( int argc, char* args[] )
 	SDL_Surface* screen = NULL;
 	SDL_Surface* background = NULL;
 	SDL_Surface* image = NULL;
+	SDL_Surface* image2 = NULL;
 	bool quit = false;
 
 	//Set environment
@@ -33,9 +36,11 @@ int main( int argc, char* args[] )
         return 1;
 
     //Load the files
-    if(!loadFile(image, "x.png"))
+    if (!loadFile(image, "foo.png"))
     	return 1;
-    if(!loadFile(background, "background.bmp"))
+    if (!loadFile(image2, "foo2.png"))
+    	return 1;
+    if (!loadFile(background, "background.bmp"))
     	return 1;
 
     apply_surface( 0, 0, background, screen );
@@ -45,6 +50,7 @@ int main( int argc, char* args[] )
 
     //Apply the message to the screen
      apply_surface( 180, 140, image, screen );
+     apply_surface( 180, 300, image2, screen);
 
     //Update Screen
      if (!update(screen))
@@ -108,6 +114,14 @@ SDL_Surface* loadImage(string filename)
 
         //Free the old image
         SDL_FreeSurface( loadedImage );
+    }
+
+    //If the image was optimized just fine
+    if( optimizedImage != NULL )
+    {
+    	//Map the color key
+    	Uint32 colorkey = SDL_MapRGB( optimizedImage->format, 0, 0xFF, 0xc6 );
+    	SDL_SetColorKey( optimizedImage, SDL_SRCCOLORKEY, colorkey );
     }
 
     //Return the optimized image
