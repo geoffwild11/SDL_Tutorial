@@ -11,12 +11,14 @@ using namespace std;
 const int SCREEN_WIDTH = 640;
 const int SCREEN_HEIGHT = 480;
 const int SCREEN_BPP = 32;
+const char* MAIN_FONT = "TechnoHideo.ttf";
 
 //Function Prototypes
 bool Init(SDL_Surface* &screen);
 SDL_Surface* loadImage(string filename);
 void apply_surface( int x, int y, SDL_Surface* source, SDL_Surface* destination, SDL_Rect* clip );
 bool loadFile(SDL_Surface* &image, string fileName);
+bool loadFont(TTF_Font* &font);
 
 bool update(SDL_Surface* screen);
 void cleanUp();
@@ -26,11 +28,16 @@ int main( int argc, char* args[] )
 
 	SDL_Surface* screen = NULL;
 	SDL_Surface* dots = NULL;
+	SDL_Surface* message = NULL;
 	bool quit = false;
 	SDL_Event event;
 
 	//map to be blitted
 	SDL_Rect clip[4];
+
+	TTF_Font* font = NULL;
+
+	SDL_Color textColor = { 255, 0, 255 };
 
 	//Set environment
     if(!Init(screen))
@@ -38,6 +45,9 @@ int main( int argc, char* args[] )
 
     //Load the files
     if (!loadFile(dots, "sprite.png"))
+    	return 1;
+
+    if ( !loadFont( font ) )
     	return 1;
 
     //Clip range for the top left
@@ -67,12 +77,16 @@ int main( int argc, char* args[] )
        //Fill the screen white
        SDL_FillRect( screen, &screen->clip_rect, SDL_MapRGB( screen->format, 0xFF, 0xFF, 0xFF ) );
 
+       //Set some text
+       message = TTF_RenderText_Solid( font, "This is my text", textColor);
+
 
     //Apply the message to the screen
      apply_surface( 0, 0, dots, screen, &clip[2] );
      apply_surface( 0, 380, dots, screen, &clip[1] );
      apply_surface( 540, 380, dots, screen, &clip[0] );
      apply_surface( 540, 0, dots, screen, &clip[3] );
+     apply_surface( 300, 240, message, screen, NULL);
      //apply_surface( 180, 300, image2, screen);
 
     //Update Screen
@@ -95,6 +109,7 @@ int main( int argc, char* args[] )
 
     //Free the surfaces
     SDL_FreeSurface( dots );
+    TTF_CloseFont( font );
     //SDL_FreeSurface( background );
 
     cleanUp();
@@ -110,10 +125,17 @@ bool Init(SDL_Surface* &screen)
 
 	screen = SDL_SetVideoMode( SCREEN_WIDTH, SCREEN_HEIGHT, SCREEN_BPP, SDL_SWSURFACE );
 
-		if (screen == NULL)
-			return false;
+	if (screen == NULL)
+		return false;
+
+	if ( TTF_Init() == -1)
+	{
+		cout << "TTF failed to initialize" << endl;
+		return false;
+	}
+
 	//Set the window caption
-	SDL_WM_SetCaption( "Event Test", NULL );
+	SDL_WM_SetCaption( "TTF Test", NULL );
 
 	return true;
 }
@@ -188,6 +210,19 @@ bool loadFile(SDL_Surface* &image, string fileName)
 		return true;
 }
 
+bool loadFont( TTF_Font* &font )
+{
+	font = TTF_OpenFont( MAIN_FONT, 20 );
+
+	if ( font == NULL )
+	{
+		cout << "Font failed to load" << endl;
+		return false;
+	}
+
+	return true;
+}
+
 bool update(SDL_Surface* screen)
 {
 	//Update the screen
@@ -202,5 +237,6 @@ bool update(SDL_Surface* screen)
 
 void cleanUp()
 {
+	TTF_Quit();
 	SDL_Quit();
 }
