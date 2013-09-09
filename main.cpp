@@ -15,7 +15,7 @@ const int SCREEN_BPP = 32;
 //Function Prototypes
 bool Init(SDL_Surface* &screen);
 SDL_Surface* loadImage(string filename);
-void apply_surface( int x, int y, SDL_Surface* source, SDL_Surface* destination );
+void apply_surface( int x, int y, SDL_Surface* source, SDL_Surface* destination, SDL_Rect* clip );
 bool loadFile(SDL_Surface* &image, string fileName);
 
 bool update(SDL_Surface* screen);
@@ -24,33 +24,56 @@ void cleanUp();
 int main( int argc, char* args[] )
 {
 
-	SDL_Event event;
 	SDL_Surface* screen = NULL;
-	SDL_Surface* background = NULL;
-	SDL_Surface* image = NULL;
-	SDL_Surface* image2 = NULL;
+	SDL_Surface* dots = NULL;
 	bool quit = false;
+	SDL_Event event;
+
+	//map to be blitted
+	SDL_Rect clip[4];
 
 	//Set environment
     if(!Init(screen))
         return 1;
 
     //Load the files
-    if (!loadFile(image, "foo.png"))
-    	return 1;
-    if (!loadFile(image2, "foo2.png"))
-    	return 1;
-    if (!loadFile(background, "background.bmp"))
+    if (!loadFile(dots, "sprite.png"))
     	return 1;
 
-    apply_surface( 0, 0, background, screen );
-    apply_surface( 320, 0, background, screen );
-    apply_surface( 0, 240, background, screen );
-    apply_surface( 320, 240, background, screen );
+    //Clip range for the top left
+       clip[ 0 ].x = 0;
+       clip[ 0 ].y = 0;
+       clip[ 0 ].w = 100;
+       clip[ 0 ].h = 100;
+
+       //Clip range for the top right
+       clip[ 1 ].x = 100;
+       clip[ 1 ].y = 0;
+       clip[ 1 ].w = 100;
+       clip[ 1 ].h = 100;
+
+       //Clip range for the bottom left
+       clip[ 2 ].x = 0;
+       clip[ 2 ].y = 100;
+       clip[ 2 ].w = 100;
+       clip[ 2 ].h = 100;
+
+       //Clip range for the bottom right
+       clip[ 3 ].x = 100;
+       clip[ 3 ].y = 100;
+       clip[ 3 ].w = 100;
+       clip[ 3 ].h = 100;
+
+       //Fill the screen white
+       SDL_FillRect( screen, &screen->clip_rect, SDL_MapRGB( screen->format, 0xFF, 0xFF, 0xFF ) );
+
 
     //Apply the message to the screen
-     apply_surface( 180, 140, image, screen );
-     apply_surface( 180, 300, image2, screen);
+     apply_surface( 0, 0, dots, screen, &clip[2] );
+     apply_surface( 0, 380, dots, screen, &clip[1] );
+     apply_surface( 540, 380, dots, screen, &clip[0] );
+     apply_surface( 540, 0, dots, screen, &clip[3] );
+     //apply_surface( 180, 300, image2, screen);
 
     //Update Screen
      if (!update(screen))
@@ -71,8 +94,8 @@ int main( int argc, char* args[] )
      }
 
     //Free the surfaces
-    SDL_FreeSurface( image );
-    SDL_FreeSurface( background );
+    SDL_FreeSurface( dots );
+    //SDL_FreeSurface( background );
 
     cleanUp();
 
@@ -120,7 +143,7 @@ SDL_Surface* loadImage(string filename)
     if( optimizedImage != NULL )
     {
     	//Map the color key
-    	Uint32 colorkey = SDL_MapRGB( optimizedImage->format, 0, 0xFF, 0xc6 );
+    	Uint32 colorkey = SDL_MapRGB( optimizedImage->format, 0, 0xFF, 0xFF );
     	SDL_SetColorKey( optimizedImage, SDL_SRCCOLORKEY, colorkey );
     }
 
@@ -128,6 +151,19 @@ SDL_Surface* loadImage(string filename)
     return optimizedImage;
 }
 
+void apply_surface( int x, int y, SDL_Surface* source, SDL_Surface* destination, SDL_Rect* clip = NULL )
+{
+	//Holds offsets
+	SDL_Rect offset;
+
+	//Get offsets
+	offset.x = x;
+	offset.y = y;
+
+    //Blit
+	SDL_BlitSurface( source, clip, destination, &offset );
+}
+/* old apply_surface()
 void apply_surface( int x, int y, SDL_Surface* source, SDL_Surface* destination )
 {
     //Make a temporary rectangle to hold the offsets
@@ -140,6 +176,7 @@ void apply_surface( int x, int y, SDL_Surface* source, SDL_Surface* destination 
     //Blit the surface
     SDL_BlitSurface( source, NULL, destination, &offset );
 }
+*/
 
 bool loadFile(SDL_Surface* &image, string fileName)
 {
