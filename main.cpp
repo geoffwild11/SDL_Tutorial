@@ -95,6 +95,7 @@ int main( int argc, char* args[] )
      apply_surface( 300, 240, message, screen, NULL);
      //apply_surface( 180, 300, image2, screen);
 
+     message = NULL;
     //Update Screen
      if (!update(screen))
     	 return 1;
@@ -121,6 +122,22 @@ int main( int argc, char* args[] )
     			 //Quit the program
                 quit = true;
              }
+
+    		 //If a message needs to be displayed
+			 if( message != NULL )
+			 {
+				 //Apply the images to the screen
+				 //Fill the screen white
+				 SDL_FillRect( screen, &screen->clip_rect, SDL_MapRGB( screen->format, 0xFF, 0xFF, 0xFF ) );
+				 apply_surface( ( SCREEN_WIDTH - message->w ) / 2, ( SCREEN_HEIGHT - message->h ) / 2, message, screen, NULL );
+
+				 //Null the surface pointer
+				 message = NULL;
+			 }
+
+			 //Update Screen
+			  if (!update(screen))
+				 return 1;
     	 }
      }
 
