@@ -50,7 +50,13 @@ int main( int argc, char* args[] )
     if ( !loadFont( font ) )
     	return 1;
 
-    //Clip range for the top left
+    //Generate the message surfaces
+    SDL_Surface* upMessage = TTF_RenderText_Solid( font, "Up was pressed.", textColor );
+	SDL_Surface* downMessage = TTF_RenderText_Solid( font, "Down was pressed.", textColor );
+	SDL_Surface* leftMessage = TTF_RenderText_Solid( font, "Left was pressed", textColor );
+	SDL_Surface* rightMessage = TTF_RenderText_Solid( font, "Right was pressed", textColor );
+
+	//Clip range for the top left
        clip[ 0 ].x = 0;
        clip[ 0 ].y = 0;
        clip[ 0 ].w = 100;
@@ -98,6 +104,17 @@ int main( int argc, char* args[] )
     	 //While there's an event to handle
     	 while( SDL_PollEvent( &event ) )
     	 {
+    		 if ( event.type == SDL_KEYDOWN )
+    		 {
+    			 switch ( event.key.keysym.sym )
+    			 {
+    			 	 case SDLK_UP: message = upMessage; break;
+					 case SDLK_DOWN: message = downMessage; break;
+					 case SDLK_LEFT: message = leftMessage; break;
+					 case SDLK_RIGHT: message = rightMessage; break;
+    			 }
+    		 }
+
     		 //If the user has Xed out the window
     		 if( event.type == SDL_QUIT )
              {
